@@ -1,0 +1,37 @@
+name: Build RemapFlasher EXE
+
+on:
+  push:
+    branches: [ main ]       # รันเมื่อ push ไป main branch
+  workflow_dispatch:          # สามารถรันเองได้จาก GitHub
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      # 1. เช็คเอาโค้ดจาก repo
+      - uses: actions/checkout@v3
+
+      # 2. ตั้งค่า Python
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      # 3. ติดตั้ง dependencies
+      - name: Install dependencies
+        run: |
+          pip install pyinstaller pyqt6 pyserial
+
+      # 4. สร้างไฟล์ .exe ด้วย PyInstaller
+      - name: Build EXE
+        run: |
+          pyinstaller --onefile --windowed --icon=remap_icon.ico remap_flasher_pro_full.py
+
+      # 5. อัปโหลดไฟล์ .exe เป็น Artifact ให้ดาวน์โหลด
+      - name: Upload EXE Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: remap_flasher_exe
+          path: dist/remap_flasher_pro_full.exe
